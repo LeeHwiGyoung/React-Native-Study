@@ -1,17 +1,22 @@
-import { FontAwesome, Ionicons, SimpleLineIcons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   FlatList,
   Image,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 interface Thread {
   id: string;
   text: string;
@@ -50,29 +55,48 @@ export default function Modal() {
   const [threads, setThreads] = useState<Thread[]>([
     { id: Date.now().toString(), text: "", imageUris: [] },
   ]);
-  const [dropdownVisible, setIsDropdownVisible] = useState(false);
   const [replyOption, setReplyOption] = useState("Anyone");
   const [isPosting, setIsPosting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [hashTagList, setHashTagList] = useState<string[]>([
-    "이전 기록 1",
-    "이전 기록 2",
-    "이전 기록 3",
-    "이전 기록 4",
-    "이전 기록 5",
-    "이전 기록 6",
-    "이전 기록 7",
-    "이전 기록 8",
-    "이전 기록 9",
-    "이전 기록 10",
-    "이전 기록 11",
-    "이전 기록 12",
-  ]);
+  const insets = useSafeAreaInsets();
 
   const canAddThread = (threads.at(-1)?.text.trim().length ?? 0) > 0;
   const canPost = threads.every((thread) => thread.text.trim().length > 0);
 
-  const getMyLocation = async (id: string) => {};
+  const getMyLocation = async (id: string) => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "location permisson not granted",
+        "Please grant location permission to use this feature",
+        [
+          {
+            text: "OpenSettings",
+            onPress: () => {
+              Linking.openSettings();
+            },
+          },
+          {
+            text: "Cancel",
+          },
+        ]
+      );
+      return;
+    }
+    const location = await Location.getCurrentPositionAsync({});
+    const address = await Location.reverseGeocodeAsync(location.coords);
+
+    setThreads((prevThreads) =>
+      prevThreads.map((threads) =>
+        threads.id === id
+          ? {
+              ...threads,
+              location: [location.coords.latitude, location.coords.longitude],
+            }
+          : threads
+      )
+    );
+  };
 
   const removeThread = (id: string) => {
     setThreads((prevThreads) =>
@@ -85,24 +109,10 @@ export default function Modal() {
 
   const handlePost = () => {};
 
-  const openDropdown = () => {
-    setIsDropdownVisible(true);
-  };
-  const closeDropdown = () => {
-    setIsDropdownVisible(false);
-  };
   const updateThreadText = (id: string, text: string) => {
     setThreads((prevThreads) =>
       prevThreads.map((thread) =>
         thread.id === id ? { ...thread, text } : thread
-      )
-    );
-  };
-
-  const updateThreadHashTag = (id: string, hashTag?: string) => {
-    setThreads((prevThreads) =>
-      prevThreads.map((thread) =>
-        thread.id === id ? { ...thread, hashTag } : thread
       )
     );
   };
@@ -126,21 +136,6 @@ export default function Modal() {
       <View style={styles.contentContainer}>
         <View style={styles.userInfoContainer}>
           <Text style={styles.username}>username</Text>
-          <View style={styles.hashTagContainer}>
-            <SimpleLineIcons
-              name="arrow-right"
-              size={12}
-              style={{ paddingHorizontal: 4 }}
-            />
-            <TextInput
-              style={{ flexGrow: 1 }}
-              placeholder="Add A topic"
-              placeholderTextColor="#999"
-              onChangeText={() => updateThreadHashTag(item.id, item.hashTag)}
-              onFocus={openDropdown}
-              onBlur={closeDropdown}
-            />
-          </View>
           {index > 0 && (
             <Pressable
               onPress={() => removeThread(item.id)}
@@ -187,6 +182,11 @@ export default function Modal() {
             style={styles.imageFlatList}
           />
         )}
+        {item.location && (
+          <View>
+            <Text>{`${item.location[0]}, ${item.location[1]}`}</Text>
+          </View>
+        )}
         <View style={styles.actionButtons}>
           <Pressable
             style={styles.actionButton}
@@ -209,7 +209,9 @@ export default function Modal() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={handleCancel}>
-          <Text style={styles.cancel}>Cancel</Text>
+          <Text style={(styles.cancel, isPosting && styles.disabledText)}>
+            Cancel
+          </Text>
         </Pressable>
         <Text style={styles.title}>New thread</Text>
         <View style={styles.headerRightPlaceHolder} />
@@ -235,8 +237,8 @@ export default function Modal() {
         contentContainerStyle={{ paddingBottom: 100, backgroundColor: "#ddd" }}
         keyboardShouldPersistTaps="handled"
       />
-      <SafeAreaView style={[styles.footer, { bottom: 10 }]}>
-        <Pressable onPress={() => setIsDropdownVisible(true)}>
+      <View style={[styles.footer, { bottom: insets.bottom }]}>
+        <Pressable onPress={() => console.log("클릭")}>
           <Text style={styles.footerText}>{replyOption} can reply & quote</Text>
         </Pressable>
         <Pressable
@@ -246,16 +248,7 @@ export default function Modal() {
         >
           <Text style={styles.postButtonText}>Post</Text>
         </Pressable>
-      </SafeAreaView>
-      {dropdownVisible && (
-        <View style={{ position: "absolute" }}>
-          {hashTagList.map((hashTag, index) => (
-            <Pressable key={`${index}-${hashTag}`}>
-              <Text>{hashTag}</Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -263,6 +256,7 @@ export default function Modal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
   },
   header: {
     flexDirection: "row",
@@ -270,10 +264,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
+    backgroundColor: "#fff",
   },
   cancel: {
     fontSize: 16,
-    color: "blue",
+    color: "#000",
+  },
+  disabledText: {
+    color: "#ccc",
   },
   title: {
     fontSize: 16,
@@ -317,30 +315,9 @@ const styles = StyleSheet.create({
   },
   userInfoContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 2,
-  },
-  hashTagContainer: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    position: "relative",
-  },
-  hashTagListContainer: {
-    borderWidth: 1,
-    position: "absolute",
-    alignItems: "center",
-    borderRadius: 10,
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-  hashTagItem: {
-    width: "100%",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  hashTagListText: {
-    paddingVertical: 8,
   },
   username: {
     fontWeight: "600",
@@ -365,9 +342,6 @@ const styles = StyleSheet.create({
   actionButton: {
     marginRight: 16,
   },
-  threadFooterContainer: {
-    flexDirection: "row",
-  },
   footer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -378,6 +352,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
+    backgroundColor: "#fff",
   },
   footerText: {
     color: "#8e8e93",
