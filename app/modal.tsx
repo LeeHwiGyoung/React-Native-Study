@@ -1,4 +1,5 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -84,7 +85,6 @@ export default function Modal() {
       return;
     }
     const location = await Location.getCurrentPositionAsync({});
-    const address = await Location.reverseGeocodeAsync(location.coords);
 
     setThreads((prevThreads) =>
       prevThreads.map((threads) =>
@@ -104,7 +104,46 @@ export default function Modal() {
     );
   };
 
-  const pickImage = async (id: string) => {};
+  const pickImage = async (id: string) => {
+    let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "사진에 접근할 권한이 없습니다",
+        "설정에서 사진 접근 권한을 설정해주세요.",
+        [
+          { text: "설정 열기", onPress: () => Linking.openSettings() },
+          { text: "닫기" },
+        ]
+      );
+      return;
+    }
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images", "livePhotos", "videos"],
+      allowsMultipleSelection: true,
+      selectionLimit: 5,
+    });
+  };
+
+  const takePhoto = async (id: string) => {
+    let { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "카메라에 접근할 권한이 없습니다",
+        "설정에서 카메라 접근 권한을 설정해주세요.",
+        [
+          { text: "설정 열기", onPress: () => Linking.openSettings() },
+          { text: "닫기" },
+        ]
+      );
+      return;
+    }
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images", "livePhotos", "videos"],
+      allowsMultipleSelection: true,
+      selectionLimit: 5,
+    });
+  };
+
   const removeImageFromThread = (id: string, uriToRemove: string) => {};
 
   const handlePost = () => {};
@@ -193,6 +232,12 @@ export default function Modal() {
             onPress={() => !isPosting && pickImage(item.id)}
           >
             <Ionicons name="image-outline" size={24} />
+          </Pressable>
+          <Pressable
+            style={styles.actionButton}
+            onPress={() => !isPosting && takePhoto(item.id)}
+          >
+            <Ionicons name="camera-outline" size={24} />
           </Pressable>
           <Pressable
             style={styles.actionButton}
