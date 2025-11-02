@@ -1,14 +1,62 @@
 import { Ionicons } from "@expo/vector-icons";
+import { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { Tabs, useRouter } from "expo-router";
-import { useState } from "react";
-import { Modal, Text, TouchableOpacity, View } from "react-native";
+import { useRef, useState } from "react";
+import {
+  Animated,
+  Modal,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 /*
 tab 레이아웃의 특징 : 탭끼리 이동을 하더라도 기존 탭의 상태가 유지된다.
 뒤로가기 클릭시 기본 동작으로 Home 으로 이동됨
 backBehavior 를 통해서 동작의 변경이 가능하다
 order  속성의 경우 탭의 순서로 이동
 history의 경우 사용자가 이동한 경로로 돌아가게 된다.
-*/ export default function TabLayout() {
+*/
+
+const AnimatedTabBarButton = ({
+  children,
+  onPress,
+  style,
+  ...restProps
+}: BottomTabBarButtonProps) => {
+  const scaleValue = useRef(new Animated.Value(1)).current;
+
+  const handlePressOut = () => {
+    Animated.sequence([
+      Animated.spring(scaleValue, {
+        toValue: 1.2,
+        useNativeDriver: true,
+        speed: 200,
+      }),
+      Animated.spring(scaleValue, {
+        toValue: 1,
+        useNativeDriver: true,
+        speed: 200,
+      }),
+    ]).start();
+  };
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressOut={handlePressOut}
+      style={[
+        { flex: 1, justifyContent: "center", alignItems: "center" },
+        style,
+      ]}
+      {...restProps}
+    >
+      <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+};
+export default function TabLayout() {
   const router = useRouter();
   const isLoggedIn = true;
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -24,6 +72,7 @@ history의 경우 사용자가 이동한 경로로 돌아가게 된다.
         backBehavior="history"
         screenOptions={{
           headerShown: false,
+          tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
         }}
       >
         <Tabs.Screen
