@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { Tabs, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import {
   Animated,
   Modal,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { AuthContext } from "../_layout";
 /*
 tab 레이아웃의 특징 : 탭끼리 이동을 하더라도 기존 탭의 상태가 유지된다.
 뒤로가기 클릭시 기본 동작으로 Home 으로 이동됨
@@ -58,7 +59,8 @@ const AnimatedTabBarButton = ({
 };
 export default function TabLayout() {
   const router = useRouter();
-  const isLoggedIn = false;
+  const { user } = useContext(AuthContext);
+  const isLoggedIn = !!user;
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const openLoginModal = () => {
     setIsLoginModalOpen(true);

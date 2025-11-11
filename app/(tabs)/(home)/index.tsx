@@ -1,21 +1,44 @@
+import { AuthContext } from "@/app/_layout";
+import SideMenu from "@/components/SideMenu";
+import { Ionicons } from "@expo/vector-icons";
 import { usePathname, useRouter } from "expo-router";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useContext, useState } from "react";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const router = useRouter();
   const pathname = usePathname();
-  const isLoggedIn = false;
-  console.log("현재 경로:", pathname);
+  const { user, login } = useContext(AuthContext);
+  const isLoggedIn = !!user;
+  const [isVisibleSideMenu, setIsVisibleSideMenu] = useState(false);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <SideMenu
+        onClose={() => setIsVisibleSideMenu(false)}
+        isVisible={isVisibleSideMenu}
+      />
       <View style={styles.header}>
+        <Pressable
+          style={styles.sideMenu}
+          onPress={() => setIsVisibleSideMenu(true)}
+        >
+          <Ionicons name="menu" size={24} color="black" />
+        </Pressable>
         <Image
           style={styles.headerLogo}
           source={require("../../../assets/images/react-logo.png")}
         />
         {!isLoggedIn && (
-          <TouchableOpacity style={styles.loginButton}>
+          <TouchableOpacity style={styles.loginButton} onPress={login}>
             <Text style={styles.loginButtonText}>로그인</Text>
           </TouchableOpacity>
         )}
@@ -30,7 +53,7 @@ export default function Index() {
             </TouchableOpacity>
           </View>
           <View style={styles.tab}>
-            <TouchableOpacity onPress={() => router.replace(`/following`)}>
+            <TouchableOpacity onPress={() => router.push(`/following`)}>
               <Text style={{ color: pathname === "/" ? "black" : "red" }}>
                 For you
               </Text>
@@ -53,7 +76,7 @@ export default function Index() {
           <Text>게시글3</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -74,6 +97,12 @@ const styles = StyleSheet.create({
   headerLogo: {
     width: 42,
     height: 42,
+  },
+  sideMenu: {
+    position: "absolute",
+    top: 0,
+    left: 20,
+    paddingVertical: 8,
   },
   loginButton: {
     position: "absolute",
