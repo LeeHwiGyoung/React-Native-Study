@@ -14,6 +14,7 @@ import {
   Text,
   TextInput,
   View,
+  Modal as RNModal,
 } from "react-native";
 import {
   SafeAreaView,
@@ -60,6 +61,8 @@ export default function Modal() {
   const [replyOption, setReplyOption] = useState("Anyone");
   const [isPosting, setIsPosting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const replyOptions = ["Anyone", "Profiles you follow", "Mentioned only"];
   const insets = useSafeAreaInsets();
 
   const canAddThread =
@@ -332,8 +335,44 @@ export default function Modal() {
         contentContainerStyle={{ paddingBottom: 100, backgroundColor: "#ddd" }}
         keyboardShouldPersistTaps="handled"
       />
+      <RNModal
+        transparent={true}
+        visible={isDropdownVisible}
+        animationType="fade"
+        onRequestClose={() => setIsDropdownVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setIsDropdownVisible(false)}
+        >
+          <View style={styles.dropdownContainer}>
+            {replyOptions.map((option) => (
+              <Pressable
+                key={option}
+                style={[
+                  styles.dropdownOption,
+                  option === replyOption && styles.selectedOption,
+                ]}
+                onPress={() => {
+                  setReplyOption(option);
+                  setIsDropdownVisible(false);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.dropdownOptionText,
+                    option === replyOption && styles.selectedOptionText,
+                  ]}
+                >
+                  {option}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </RNModal>
       <View style={[styles.footer, { bottom: insets.bottom }]}>
-        <Pressable onPress={() => console.log("클릭")}>
+        <Pressable onPress={() => setIsDropdownVisible(true)}>
           <Text style={styles.footerText}>{replyOption} can reply & quote</Text>
         </Pressable>
         <Pressable
@@ -462,6 +501,34 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.8)",
     borderRadius: 12,
     padding: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  dropdownContainer: {
+    width: 200,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    marginHorizontal: 10,
+    overflow: "hidden",
+    bottom: 20,
+  },
+  dropdownOption: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: " #e5e5e5",
+  },
+  dropdownOptionText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  selectedOption: {},
+  selectedOptionText: {
+    fontWeight: "600",
+    color: "#007AFF",
   },
   footer: {
     flexDirection: "row",
