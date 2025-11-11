@@ -1,6 +1,7 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
+import * as MediaLibrary from "expo-media-library";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -61,8 +62,12 @@ export default function Modal() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
 
-  const canAddThread = (threads.at(-1)?.text.trim().length ?? 0) > 0;
-  const canPost = threads.every((thread) => thread.text.trim().length > 0);
+  const canAddThread =
+    (threads.at(-1)?.text.trim().length ?? 0) > 0 ||
+    (threads.at(-1)?.imageUris.length ?? 0) > 0;
+  const canPost = threads.every(
+    (thread) => thread.text.trim().length > 0 || thread.imageUris.length > 0
+  );
 
   const getMyLocation = async (id: string) => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -122,6 +127,20 @@ export default function Modal() {
       allowsMultipleSelection: true,
       selectionLimit: 5,
     });
+    if (!result.canceled) {
+      setThreads((prevThreads) =>
+        prevThreads.map((thread) =>
+          thread.id === id
+            ? {
+                ...thread,
+                imageUris: thread.imageUris.concat(
+                  result.assets?.map((asset) => asset.uri) ?? []
+                ),
+              }
+            : thread
+        )
+      );
+    }
   };
 
   const takePhoto = async (id: string) => {
@@ -142,9 +161,40 @@ export default function Modal() {
       allowsMultipleSelection: true,
       selectionLimit: 5,
     });
+
+    status = (await MediaLibrary.requestPermissionsAsync()).status;
+    if (status === "granted" && result.assets?.[0].uri) {
+      MediaLibrary.saveToLibraryAsync(result.assets[0].uri);
+    }
+
+    if (!result.canceled) {
+      setThreads((prevThreads) =>
+        prevThreads.map((thread) =>
+          thread.id === id
+            ? {
+                ...thread,
+                imageUris: thread.imageUris.concat(
+                  result.assets?.map((asset) => asset.uri) ?? []
+                ),
+              }
+            : thread
+        )
+      );
+    }
   };
 
-  const removeImageFromThread = (id: string, uriToRemove: string) => {};
+  const removeImageFromThread = (id: string, uriToRemove: string) => {
+    setThreads((prevThreads) =>
+      prevThreads.map((thread) =>
+        thread.id === id
+          ? {
+              ...thread,
+              imageUris: thread.imageUris.filter((uri) => uri !== uriToRemove),
+            }
+          : thread
+      )
+    );
+  };
 
   const handlePost = () => {};
 
@@ -197,7 +247,7 @@ export default function Modal() {
           <FlatList
             data={item.imageUris}
             renderItem={({ item: uri, index: imgIndex }) => (
-              <View>
+              <View style={styles.imagePreviewContainer}>
                 <Image source={{ uri }} style={styles.imagePreview} />
                 <Pressable
                   onPress={() =>
@@ -364,6 +414,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 2,
   },
+  removeButton: {},
   username: {
     fontWeight: "600",
     fontSize: 16,
@@ -386,6 +437,31 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginRight: 16,
+  },
+  imageFlatList: {
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  imagePreviewContainer: {
+    position: "relative",
+    marginRight: 8,
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    overflow: "hidden",
+    backgroundColor: "f0f0f0",
+  },
+  imagePreview: {
+    width: "100%",
+    height: "100%",
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    borderRadius: 12,
+    padding: 2,
   },
   footer: {
     flexDirection: "row",
@@ -416,7 +492,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
   },
-
   listFooter: {
     paddingLeft: 26,
     paddingTop: 10,
