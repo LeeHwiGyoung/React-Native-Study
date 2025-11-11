@@ -58,13 +58,18 @@ const AnimatedTabBarButton = ({
 };
 export default function TabLayout() {
   const router = useRouter();
-  const isLoggedIn = true;
+  const isLoggedIn = false;
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const openLoginModal = () => {
     setIsLoginModalOpen(true);
   };
   const closeLoginModal = () => {
     setIsLoginModalOpen(false);
+  };
+
+  const toLoginPage = () => {
+    setIsLoginModalOpen(false);
+    router.push("/login");
   };
   return (
     <>
@@ -192,7 +197,9 @@ export default function TabLayout() {
           }}
         >
           <View style={{ backgroundColor: "#fff", padding: 20 }}>
-            <Text>로그인 모달</Text>
+            <Pressable onPress={toLoginPage}>
+              <Text>go To Login Page</Text>
+            </Pressable>
             <TouchableOpacity onPress={closeLoginModal}>
               <Ionicons name="close" size={24} color="#555" />
             </TouchableOpacity>
