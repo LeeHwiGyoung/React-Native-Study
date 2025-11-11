@@ -1,38 +1,27 @@
 import { Redirect, useRouter } from "expo-router";
-import { Alert, Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useContext } from "react";
+import { AuthContext } from "./_layout";
+/*
 
+ expo 에서는 secureStore와 asyncStore를 제공
+ asyncStore 는 공개된 값들을 앱에 남겨놓을 때 적합
+ 운영체제에서 제공하는 보안키 제공 장소에 저장
+*/
 export default function Login() {
   const router = useRouter();
-  const isLoggedIn = false;
+  const { user, login } = useContext(AuthContext);
+  const isLoggedIn = !!user;
   if (isLoggedIn) {
     return <Redirect href="/(tabs)" />;
   }
-  const onLogin = () => {
-    console.log("login");
-    fetch("/login", {
-      method: "POST",
-      body: JSON.stringify({
-        username: "hwigyoung",
-        password: "1234",
-      }),
-    })
-      .then((res) => {
-        console.log("res", res, res.status);
-        if (res.status >= 400) {
-          return Alert.alert("Error", "invaild credentials");
-        }
-        return res.json();
-      })
-      .then((data) => console.log(data))
-      .catch((error) => console.error(error));
-  };
   return (
     <SafeAreaView>
       <Pressable onPress={() => router.back()}>
         <Text>backs</Text>
       </Pressable>
-      <Pressable onPress={onLogin} style={styles.loginButton}>
+      <Pressable onPress={login} style={styles.loginButton}>
         <Text style={styles.loginButtonText}>Login</Text>
       </Pressable>
     </SafeAreaView>
