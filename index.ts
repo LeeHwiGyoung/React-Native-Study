@@ -23,6 +23,9 @@ window.server = createServer({
           refreshToken: "refresh-token",
           user: {
             id: "hwigyoung",
+            name: "휘경",
+            profileImageUrl: "",
+            description: "프론트엔드 개발자가 되고 싶은 사람",
           },
         };
       } else {
