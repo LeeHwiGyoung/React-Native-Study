@@ -1,4 +1,4 @@
-import { router, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { createContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
 import * as SecureStore from "expo-secure-store";
@@ -13,7 +13,7 @@ interface User {
 
 export const AuthContext = createContext<{
   user?: User | null;
-  login?: () => Promise<void>;
+  login?: () => Promise<any>;
   logout?: () => Promise<any>;
 }>({
   user: null,
@@ -44,10 +44,11 @@ export default function RootLayout() {
           SecureStore.setItemAsync("accessToken", data.accessToken),
           SecureStore.setItemAsync("refreshToken", data.refreshToken),
           AsyncStorage.setItem("user", JSON.stringify(data.user)),
-        ]).then(() => router.push("/(tabs)"));
+        ]);
       })
       .catch((error) => console.error(error));
   };
+
   const logout = () => {
     setUser(null);
     return Promise.all([
