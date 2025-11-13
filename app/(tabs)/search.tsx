@@ -1,12 +1,15 @@
 import SideMenu from "@/components/SideMenu";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthContext } from "../_layout";
 
 export default function Saech() {
   const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const { user } = useContext(AuthContext);
+  const isLoggedIn = !!user;
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.container, { top: insets.top }]}>
@@ -15,12 +18,14 @@ export default function Saech() {
         onClose={() => setIsSideMenuVisible(false)}
       />
       <View style={styles.header}>
-        <Pressable
-          onPress={() => setIsSideMenuVisible(true)}
-          style={styles.sideMenu}
-        >
-          <Ionicons name="menu" size={24} color="black" />
-        </Pressable>
+        {isLoggedIn && (
+          <Pressable
+            onPress={() => setIsSideMenuVisible(true)}
+            style={styles.sideMenu}
+          >
+            <Ionicons name="menu" size={24} color="black" />
+          </Pressable>
+        )}
       </View>
       <View style={styles.searchBar}>
         <TextInput

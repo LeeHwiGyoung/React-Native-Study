@@ -1,8 +1,9 @@
 import NotFound from "@/app/+not-found";
+import { AuthContext } from "@/app/_layout";
 import SideMenu from "@/components/SideMenu";
 import { Ionicons } from "@expo/vector-icons";
 import { usePathname, useRouter } from "expo-router";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -15,6 +16,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function Activity() {
   const router = useRouter();
   const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
+  const { user } = useContext(AuthContext);
+  const isLoggedIn = !!user;
   const pathname = usePathname(); // 현재 주소를 반환하는 훅
   const insets = useSafeAreaInsets();
   if (
@@ -37,12 +40,14 @@ export default function Activity() {
         onClose={() => setIsSideMenuVisible(false)}
       />
       <View style={styles.header}>
-        <Pressable
-          onPress={() => setIsSideMenuVisible(true)}
-          style={styles.sideMenu}
-        >
-          <Ionicons name="menu" size={24} color="black" />
-        </Pressable>
+        {isLoggedIn && (
+          <Pressable
+            onPress={() => setIsSideMenuVisible(true)}
+            style={styles.sideMenu}
+          >
+            <Ionicons name="menu" size={24} color="black" />
+          </Pressable>
+        )}
       </View>
       <View>
         <View style={styles.tabBar}>

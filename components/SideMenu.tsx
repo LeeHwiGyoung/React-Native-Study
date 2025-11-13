@@ -1,6 +1,7 @@
+import { AuthContext } from "@/app/_layout";
 import { Ionicons } from "@expo/vector-icons";
 
-import React from "react";
+import React, { useContext } from "react";
 import {
   Modal,
   Pressable,
@@ -16,6 +17,11 @@ interface SideMenuProps {
   onClose: () => void;
 }
 export default function SideMenu({ isVisible, onClose }: SideMenuProps) {
+  const { logout } = useContext(AuthContext);
+  const handleLogout = () => {
+    logout?.();
+    onClose();
+  };
   return (
     <Modal
       animationType="fade"
@@ -45,7 +51,7 @@ export default function SideMenu({ isVisible, onClose }: SideMenuProps) {
             <Pressable style={styles.menuItem}>
               <Text style={styles.menuItemText}>Report a problem</Text>
             </Pressable>
-            <Pressable style={styles.menuItem}>
+            <Pressable style={styles.menuItem} onPress={handleLogout}>
               <Text style={[styles.menuItemText, styles.logoutText]}>
                 Logout
               </Text>
