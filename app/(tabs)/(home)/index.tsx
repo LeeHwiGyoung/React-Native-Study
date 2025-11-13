@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
   const router = useRouter();
@@ -19,9 +19,9 @@ export default function Index() {
   const { user, login } = useContext(AuthContext);
   const isLoggedIn = !!user;
   const [isVisibleSideMenu, setIsVisibleSideMenu] = useState(false);
-
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { top: insets.top }]}>
       <SideMenu
         onClose={() => setIsVisibleSideMenu(false)}
         isVisible={isVisibleSideMenu}

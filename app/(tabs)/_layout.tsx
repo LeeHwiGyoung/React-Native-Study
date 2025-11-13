@@ -62,6 +62,7 @@ export default function TabLayout() {
   const { user } = useContext(AuthContext);
   const isLoggedIn = !!user;
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   const openLoginModal = () => {
     setIsLoginModalOpen(true);
   };

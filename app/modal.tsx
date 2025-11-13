@@ -16,10 +16,7 @@ import {
   View,
   Modal as RNModal,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 interface Thread {
   id: string;
   text: string;
@@ -304,7 +301,7 @@ export default function Modal() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { top: insets.top }]}>
       <View style={styles.header}>
         <Pressable onPress={handleCancel}>
           <Text style={(styles.cancel, isPosting && styles.disabledText)}>
@@ -383,7 +380,7 @@ export default function Modal() {
           <Text style={styles.postButtonText}>Post</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

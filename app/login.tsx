@@ -1,6 +1,6 @@
 import { Redirect, useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useContext } from "react";
 import { AuthContext } from "./_layout";
 /*
@@ -13,18 +13,19 @@ export default function Login() {
   const router = useRouter();
   const { user, login } = useContext(AuthContext);
   const isLoggedIn = !!user;
+  const insets = useSafeAreaInsets();
   if (isLoggedIn) {
     return <Redirect href="/(tabs)" />;
   }
   return (
-    <SafeAreaView>
+    <View style={{ top: insets.top, bottom: insets.bottom }}>
       <Pressable onPress={() => router.back()}>
         <Text>backs</Text>
       </Pressable>
       <Pressable onPress={login} style={styles.loginButton}>
         <Text style={styles.loginButtonText}>Login</Text>
       </Pressable>
-    </SafeAreaView>
+    </View>
   );
 }
 
