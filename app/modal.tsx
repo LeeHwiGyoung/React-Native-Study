@@ -15,6 +15,7 @@ import {
   TextInput,
   View,
   Modal as RNModal,
+  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 interface Thread {
@@ -32,11 +33,17 @@ export function ListFooter({
   canAddThread: boolean;
   addThread: () => void;
 }) {
+  const colorScheme = useColorScheme();
   return (
     <View style={styles.listFooter}>
       <View style={styles.listFooterAvatar}>
         <Ionicons
-          style={styles.avatarSmall}
+          style={[
+            styles.avatarSmall,
+            colorScheme === "dark"
+              ? styles.avatarSmallDark
+              : styles.avatarSmallLight,
+          ]}
           name="person-circle-outline"
           size={24}
         />
@@ -61,7 +68,7 @@ export default function Modal() {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const replyOptions = ["Anyone", "Profiles you follow", "Mentioned only"];
   const insets = useSafeAreaInsets();
-
+  const colorScheme = useColorScheme();
   const canAddThread =
     (threads.at(-1)?.text.trim().length ?? 0) > 0 ||
     (threads.at(-1)?.imageUris.length ?? 0) > 0;
@@ -217,14 +224,32 @@ export default function Modal() {
     item: Thread;
     index: number;
   }) => (
-    <View style={styles.threadContainer}>
+    <View style={[styles.threadContainer]}>
       <View style={styles.avatarContainer}>
-        <Ionicons name="person-circle-outline" size={40} />
-        <View style={styles.threadLine} />
+        <Ionicons
+          name="person-circle-outline"
+          size={40}
+          color={colorScheme === "dark" ? "white" : "black"}
+        />
+        <View
+          style={[
+            styles.threadLine,
+            colorScheme === "dark"
+              ? styles.threadLineDark
+              : styles.threadLineLight,
+          ]}
+        />
       </View>
       <View style={styles.contentContainer}>
         <View style={styles.userInfoContainer}>
-          <Text style={styles.username}>username</Text>
+          <Text
+            style={[
+              styles.username,
+              colorScheme === "dark" ? styles.textDark : styles.textLight,
+            ]}
+          >
+            username
+          </Text>
           {index > 0 && (
             <Pressable
               onPress={() => removeThread(item.id)}
@@ -236,11 +261,16 @@ export default function Modal() {
           )}
         </View>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            colorScheme === "dark" ? styles.textDark : styles.textLight,
+          ]}
           placeholder={"What's new?"}
           placeholderTextColor="#999"
           value={item.text}
           onChangeText={(text) => updateThreadText(item.id, text)}
+          onFocus={() => setIsPosting(true)}
+          onBlur={() => setIsPosting(false)}
           multiline
         />
         {item.imageUris && item.imageUris.length > 0 && (
@@ -281,19 +311,31 @@ export default function Modal() {
             style={styles.actionButton}
             onPress={() => !isPosting && pickImage(item.id)}
           >
-            <Ionicons name="image-outline" size={24} />
+            <Ionicons
+              name="image-outline"
+              size={24}
+              color={colorScheme === "dark" ? "white" : "black"}
+            />
           </Pressable>
           <Pressable
             style={styles.actionButton}
             onPress={() => !isPosting && takePhoto(item.id)}
           >
-            <Ionicons name="camera-outline" size={24} />
+            <Ionicons
+              name="camera-outline"
+              size={24}
+              color={colorScheme === "dark" ? "white" : "black"}
+            />
           </Pressable>
           <Pressable
             style={styles.actionButton}
             onPress={() => getMyLocation(item.id)}
           >
-            <FontAwesome name="map-marker" size={24} />
+            <FontAwesome
+              name="map-marker"
+              size={24}
+              color={colorScheme === "dark" ? "white" : "black"}
+            />
           </Pressable>
         </View>
       </View>
@@ -301,14 +343,38 @@ export default function Modal() {
   );
 
   return (
-    <View style={[styles.container, { top: insets.top }]}>
-      <View style={styles.header}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top },
+        colorScheme === "dark" ? styles.containerDark : styles.containerLight,
+      ]}
+    >
+      <View
+        style={[
+          styles.header,
+          colorScheme === "dark" ? styles.headerDark : styles.headerLight,
+        ]}
+      >
         <Pressable onPress={handleCancel}>
-          <Text style={(styles.cancel, isPosting && styles.disabledText)}>
+          <Text
+            style={[
+              styles.cancel,
+              colorScheme === "dark" ? styles.textDark : styles.textLight,
+              isPosting && styles.disabledText,
+            ]}
+          >
             Cancel
           </Text>
         </Pressable>
-        <Text style={styles.title}>New thread</Text>
+        <Text
+          style={[
+            styles.title,
+            colorScheme === "dark" ? styles.textDark : styles.textLight,
+          ]}
+        >
+          New thread
+        </Text>
         <View style={styles.headerRightPlaceHolder} />
       </View>
       <FlatList
@@ -328,8 +394,16 @@ export default function Modal() {
             }}
           />
         }
-        style={styles.list}
-        contentContainerStyle={{ paddingBottom: 100, backgroundColor: "#ddd" }}
+        style={[
+          styles.list,
+          colorScheme === "dark" ? styles.listDark : styles.listLight,
+        ]}
+        contentContainerStyle={[
+          { paddingBottom: 100 },
+          colorScheme === "dark"
+            ? { backgroundColor: "#101010" }
+            : { backgroundColor: "#ddd" },
+        ]}
         keyboardShouldPersistTaps="handled"
       />
       <RNModal
@@ -342,7 +416,14 @@ export default function Modal() {
           style={styles.modalOverlay}
           onPress={() => setIsDropdownVisible(false)}
         >
-          <View style={styles.dropdownContainer}>
+          <View
+            style={[
+              styles.dropdownContainer,
+              colorScheme === "dark"
+                ? styles.dropdownContainerDark
+                : styles.dropdownContainerLight,
+            ]}
+          >
             {replyOptions.map((option) => (
               <Pressable
                 key={option}
@@ -368,12 +449,31 @@ export default function Modal() {
           </View>
         </Pressable>
       </RNModal>
-      <View style={[styles.footer, { bottom: insets.bottom }]}>
+      <View
+        style={[
+          styles.footer,
+          { paddingBottom: insets.bottom },
+          colorScheme === "dark" ? styles.footerDark : styles.footerLight,
+        ]}
+      >
         <Pressable onPress={() => setIsDropdownVisible(true)}>
-          <Text style={styles.footerText}>{replyOption} can reply & quote</Text>
+          <Text
+            style={[
+              styles.footerText,
+              colorScheme === "dark" && styles.textDark,
+            ]}
+          >
+            {replyOption} can reply & quote
+          </Text>
         </Pressable>
         <Pressable
-          style={[styles.postButton, !canPost && styles.postButtonDisabled]}
+          style={[
+            styles.postButton,
+            !canPost && styles.postButtonDisabled,
+            colorScheme === "dark"
+              ? styles.postButtonDark
+              : styles.postButtonLight,
+          ]}
           disabled={!canPost}
           onPress={handlePost}
         >
@@ -387,6 +487,11 @@ export default function Modal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  containerDark: {
+    backgroundColor: "#101010",
+  },
+  containerLight: {
     backgroundColor: "#fff",
   },
   header: {
@@ -395,12 +500,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#fff",
   },
+  headerDark: { backgroundColor: "#101010" },
+  headerLight: { backgroundColor: "#fff" },
   cancel: {
     fontSize: 16,
-    color: "#000",
   },
+  textLight: { color: "#000" },
+  textDark: { color: "white" },
   disabledText: {
     color: "#ccc",
   },
@@ -414,8 +521,9 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
-    backgroundColor: "#eee",
   },
+  listDark: { backgroundColor: "#111111" },
+  listLight: { backgroundColor: "#eee" },
   threadContainer: {
     flexDirection: "row",
     paddingHorizontal: 16,
@@ -432,10 +540,17 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: "#555",
   },
+  avatarDark: {},
+  avatarLight: {},
   avatarSmall: {
     width: 24,
     height: 24,
     borderRadius: 12,
+  },
+  avatarSmallDark: {
+    backgroundColor: "white",
+  },
+  avatarSmallLight: {
     backgroundColor: "#555",
   },
   threadLine: {
@@ -444,6 +559,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#aaa",
     marginTop: 8,
   },
+  threadLineDark: {},
+  threadLineLight: {},
   userInfoContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -461,7 +578,6 @@ const styles = StyleSheet.create({
   },
   input: {
     fontSize: 15,
-    color: "#000",
     paddingTop: 4,
     paddingBottom: 8,
     minHeight: 24,
@@ -506,12 +622,13 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     width: 200,
-    backgroundColor: "#fff",
     borderRadius: 10,
     marginHorizontal: 10,
     overflow: "hidden",
     bottom: 20,
   },
+  dropdownContainerDark: { backgroundColor: "#101010" },
+  dropdownContainerLight: { backgroundColor: "#fff" },
   dropdownOption: {
     paddingVertical: 16,
     paddingHorizontal: 20,
@@ -537,24 +654,35 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    backgroundColor: "#fff",
   },
+  footerDark: { backgroundColor: "#101010" },
+  footerLight: { backgroundColor: "#fff" },
   footerText: {
     color: "#8e8e93",
     fontSize: 14,
   },
   postButton: {
     borderRadius: 20,
-    backgroundColor: "#000",
     paddingVertical: 8,
     paddingHorizontal: 18,
+  },
+  postButtonDark: {
+    backgroundColor: "white",
+  },
+  postButtonLight: {
+    backgroundColor: "#000",
   },
   postButtonDisabled: {
     backgroundColor: "#ccc",
   },
   postButtonText: {
-    color: "#fff",
     fontSize: 16,
+  },
+  postButtonTextLight: {
+    color: "#fff",
+  },
+  postButtonTextDark: {
+    color: "black",
   },
   listFooter: {
     paddingLeft: 26,

@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,6 +21,7 @@ export default function Activity() {
   const isLoggedIn = !!user;
   const pathname = usePathname(); // 현재 주소를 반환하는 훅
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
   if (
     ![
       "/activity",
@@ -34,18 +36,33 @@ export default function Activity() {
     return <NotFound />;
   }
   return (
-    <View style={[styles.container, { top: insets.top }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top },
+        colorScheme === "dark" ? styles.containerDark : styles.containerLight,
+      ]}
+    >
       <SideMenu
         isVisible={isSideMenuVisible}
         onClose={() => setIsSideMenuVisible(false)}
       />
-      <View style={styles.header}>
+      <View
+        style={[
+          styles.header,
+          colorScheme === "dark" ? styles.headerDark : styles.headerLight,
+        ]}
+      >
         {isLoggedIn && (
           <Pressable
             onPress={() => setIsSideMenuVisible(true)}
             style={styles.sideMenu}
           >
-            <Ionicons name="menu" size={24} color="black" />
+            <Ionicons
+              name="menu"
+              size={24}
+              color={colorScheme === "dark" ? "white" : "black"}
+            />
           </Pressable>
         )}
       </View>
@@ -53,14 +70,28 @@ export default function Activity() {
         <View style={styles.tabBar}>
           <TouchableOpacity onPress={() => router.push(`/activity`)}>
             {/* button과 유사 */}
-            <Text style={{ color: pathname === "/activity" ? "red" : "black" }}>
+            <Text
+              style={{
+                color:
+                  pathname === "/activity"
+                    ? "red"
+                    : colorScheme === "dark"
+                      ? "white"
+                      : "black",
+              }}
+            >
               All
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push(`/activity/follows`)}>
             <Text
               style={{
-                color: pathname === "/activity/follows" ? "red" : "black",
+                color:
+                  pathname === "/activity/follows"
+                    ? "red"
+                    : colorScheme === "dark"
+                      ? "white"
+                      : "black",
               }}
             >
               Follows
@@ -69,7 +100,12 @@ export default function Activity() {
           <TouchableOpacity onPress={() => router.push(`/activity/replies`)}>
             <Text
               style={{
-                color: pathname === "/activity/replies" ? "red" : "black",
+                color:
+                  pathname === "/activity/replies"
+                    ? "red"
+                    : colorScheme === "dark"
+                      ? "white"
+                      : "black",
               }}
             >
               Replies
@@ -78,7 +114,12 @@ export default function Activity() {
           <TouchableOpacity onPress={() => router.push(`/activity/mentions`)}>
             <Text
               style={{
-                color: pathname === "/activity/mentions" ? "red" : "black",
+                color:
+                  pathname === "/activity/mentions"
+                    ? "red"
+                    : colorScheme === "dark"
+                      ? "white"
+                      : "black",
               }}
             >
               Mentions
@@ -87,7 +128,12 @@ export default function Activity() {
           <TouchableOpacity onPress={() => router.push(`/activity/quotes`)}>
             <Text
               style={{
-                color: pathname === "/activity/quotes" ? "red" : "black",
+                color:
+                  pathname === "/activity/quotes"
+                    ? "red"
+                    : colorScheme === "dark"
+                      ? "white"
+                      : "black",
               }}
             >
               Quotes
@@ -96,7 +142,12 @@ export default function Activity() {
           <TouchableOpacity onPress={() => router.push(`/activity/reposts`)}>
             <Text
               style={{
-                color: pathname === "/activity/reposts" ? "red" : "black",
+                color:
+                  pathname === "/activity/reposts"
+                    ? "red"
+                    : colorScheme === "dark"
+                      ? "white"
+                      : "black",
               }}
             >
               Reposts
@@ -105,7 +156,12 @@ export default function Activity() {
           <TouchableOpacity onPress={() => router.push(`/activity/verified`)}>
             <Text
               style={{
-                color: pathname === "/activity/verified" ? "red" : "black",
+                color:
+                  pathname === "/activity/verified"
+                    ? "red"
+                    : colorScheme === "dark"
+                      ? "white"
+                      : "black",
               }}
             >
               Verified
@@ -121,10 +177,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  containerDark: {
+    backgroundColor: "#101010",
+  },
+  containerLight: {
+    backgroundColor: "white",
+  },
   header: {
     alignItems: "center",
     height: 50,
     justifyContent: "space-between",
+  },
+  headerDark: {
+    backgroundColor: "#101010",
+  },
+  headerLight: {
+    backgroundColor: "white",
   },
   sideMenu: {
     position: "absolute",

@@ -13,6 +13,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import SideMenu from "@/components/SideMenu";
@@ -31,24 +32,40 @@ export const MaterialTopTabs = withLayoutContext<
 >(Navigator);
 
 export default function Layout() {
+  const colorScheme = useColorScheme();
   const { user, login } = useContext(AuthContext);
   const isLoggedIn = !!user;
   const [isVisibleSideMenu, setIsVisibleSideMenu] = useState(false);
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { top: insets.top }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top },
+        colorScheme === "dark" ? styles.containerDark : styles.containerLight,
+      ]}
+    >
       <SideMenu
         onClose={() => setIsVisibleSideMenu(false)}
         isVisible={isVisibleSideMenu}
       />
-      <View style={styles.header}>
+      <View
+        style={[
+          styles.header,
+          colorScheme === "dark" ? styles.headerDark : styles.headerLight,
+        ]}
+      >
         {isLoggedIn && (
           <Pressable
             style={styles.sideMenu}
             onPress={() => setIsVisibleSideMenu(true)}
           >
-            <Ionicons name="menu" size={24} color="black" />
+            <Ionicons
+              name="menu"
+              size={24}
+              color={colorScheme === "dark" ? "white" : "black"}
+            />
           </Pressable>
         )}
         <Image
@@ -56,8 +73,24 @@ export default function Layout() {
           source={require("../../../assets/images/react-logo.png")}
         />
         {!isLoggedIn && (
-          <TouchableOpacity style={styles.loginButton} onPress={login}>
-            <Text style={styles.loginButtonText}>로그인</Text>
+          <TouchableOpacity
+            style={[
+              styles.loginButton,
+              colorScheme === "dark"
+                ? styles.loginButtonDark
+                : styles.loginButtonLight,
+            ]}
+            onPress={login}
+          >
+            <Text
+              style={
+                colorScheme === "dark"
+                  ? styles.loginButtonDarkText
+                  : styles.loginButtonLightText
+              }
+            >
+              로그인
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -66,18 +99,18 @@ export default function Layout() {
           screenOptions={{
             lazy: true,
             tabBarStyle: {
-              backgroundColor: "white",
+              backgroundColor: colorScheme === "dark" ? "#181818" : "white",
               shadowColor: "transparent",
               position: "relative",
             },
             tabBarPressColor: "transparent",
-            tabBarActiveTintColor: "#555",
+            tabBarActiveTintColor: colorScheme === "dark" ? "white" : "#555",
             tabBarIndicatorStyle: {
-              backgroundColor: "black",
+              backgroundColor: colorScheme === "dark" ? "white" : "black",
               height: 1,
             },
             tabBarIndicatorContainerStyle: {
-              backgroundColor: "#aaa",
+              backgroundColor: colorScheme === "dark" ? "white" : "#aaa",
               position: "absolute",
               top: 49,
               height: 1,
@@ -100,6 +133,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  containerDark: {
+    backgroundColor: "#101010",
+  },
+  containerLight: {
+    backgroundColor: "white",
+  },
   tabContainer: {
     flexDirection: "row",
   },
@@ -109,6 +148,13 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
+    height: 50,
+  },
+  headerDark: {
+    backgroundColor: "#101010",
+  },
+  headerLight: {
+    backgroundColor: "white",
   },
   headerLogo: {
     width: 42,
@@ -124,12 +170,20 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 20,
     top: 0,
-    backgroundColor: "#000",
     borderRadius: 10,
     paddingVertical: 8,
     paddingHorizontal: 20,
   },
-  loginButtonText: {
-    color: "#fff",
+  loginButtonDark: {
+    backgroundColor: "white",
+  },
+  loginButtonLight: {
+    backgroundColor: "black",
+  },
+  loginButtonDarkText: {
+    color: "black",
+  },
+  loginButtonLightText: {
+    color: "white",
   },
 });
