@@ -10,6 +10,7 @@ import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import {
   Image,
   Pressable,
+  Share,
   StyleSheet,
   Text,
   useColorScheme,
@@ -36,6 +37,16 @@ export default function Layout() {
   const isLoggedIn = !!user;
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
+
+  const handleShareProfile = async () => {
+    try {
+      await Share.share({
+        message: `thread://@${user?.name}`,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <View
       style={[
@@ -54,6 +65,10 @@ export default function Layout() {
           colorScheme === "dark" ? styles.headerDark : styles.headerLight,
         ]}
       >
+        <Image
+          style={styles.headerLogo}
+          source={require("../../../assets/images/react-logo.png")}
+        />
         {isLoggedIn && (
           <Pressable
             onPress={() => setIsSideMenuVisible(true)}
@@ -75,8 +90,22 @@ export default function Layout() {
               style={styles.profileAvatar}
             />
           ) : (
-            <Ionicons name="person-circle-outline" size={50} />
+            <Ionicons
+              name="person-circle-outline"
+              size={60}
+              style={styles.profileAvatar}
+            />
           )}
+          <Text
+            style={[
+              styles.userIdText,
+              colorScheme === "dark"
+                ? styles.profileDarkText
+                : styles.profileLightText,
+            ]}
+          >
+            {user?.id}
+          </Text>
           <Text
             style={
               colorScheme === "dark"
@@ -87,14 +116,56 @@ export default function Layout() {
             {user?.name}
           </Text>
           <Text
-            style={
+            style={[
+              styles.profileUserDescription,
               colorScheme === "dark"
                 ? styles.profileDarkText
-                : styles.profileLightText
-            }
+                : styles.profileLightText,
+            ]}
           >
             {user?.description}
           </Text>
+        </View>
+        <View style={styles.actionButtons}>
+          <Pressable
+            style={[
+              styles.actionButton,
+              colorScheme === "dark"
+                ? styles.actionButtonDark
+                : styles.actionButtonLight,
+            ]}
+          >
+            <Text
+              style={[
+                styles.actionButtonText,
+                colorScheme === "dark"
+                  ? styles.profileDarkText
+                  : styles.profileLightText,
+              ]}
+            >
+              Follow
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.actionButton,
+              colorScheme === "dark"
+                ? styles.actionButtonDark
+                : styles.actionButtonLight,
+            ]}
+            onPress={handleShareProfile}
+          >
+            <Text
+              style={[
+                styles.actionButtonText,
+                colorScheme === "dark"
+                  ? styles.profileDarkText
+                  : styles.profileLightText,
+              ]}
+            >
+              Share profile
+            </Text>
+          </Pressable>
         </View>
       </View>
       <MaterialTopTabs
@@ -139,6 +210,10 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: "space-between",
   },
+  headerLogo: {
+    width: 42,
+    height: 42,
+  },
   headerDark: {
     backgroundColor: "#101010",
   },
@@ -151,15 +226,52 @@ const styles = StyleSheet.create({
     left: 20,
     paddingVertical: 8,
   },
-  profile: {},
+  profile: {
+    padding: 16,
+  },
+  userIdText: {
+    fontSize: 20,
+    fontWeight: 700,
+  },
   profileDarkText: {
     color: "white",
   },
   profileLightText: { color: "black" },
-  profileHeader: {},
+  profileHeader: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+  },
   profileAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    position: "absolute",
+    right: 0,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  profileUserDescription: {
+    marginVertical: 12,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  actionButton: {
+    flex: 1,
+    borderWidth: 1,
+    alignItems: "center",
+    borderRadius: 8,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+  },
+  actionButtonDark: {
+    backgroundColor: "#101010",
+    borderColor: "white",
+  },
+  actionButtonLight: {
+    backgroundColor: "#fff",
+    borderColor: "black",
+  },
+  actionButtonText: {
+    fontSize: 16,
   },
 });
