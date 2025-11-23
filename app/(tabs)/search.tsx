@@ -30,7 +30,6 @@ export default function Saech() {
       .then((res) => res.json())
       .then((data) => {
         setFollowSuggestUsers(data.users);
-        console.log("search", data.users);
       });
   }, []);
   return (

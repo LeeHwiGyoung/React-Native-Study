@@ -8,7 +8,6 @@ export default function Username() {
   const router = useRouter();
   const { username } = useLocalSearchParams(); //[]내의 값을 실제로 받아오는 훅
   const colorScheme = useColorScheme();
-  console.log("username", username);
   return (
     <View
       style={[
