@@ -63,6 +63,7 @@ window.server = createServer({
       likes: () => Math.floor(Math.random() * 100),
       comments: () => Math.floor(Math.random() * 100),
       reposts: () => Math.floor(Math.random() * 100),
+      timeAgo: () => Math.floor(Math.random() * 10) + 1,
     }),
     activity: Factory.extend({
       id: () => faker.string.numeric(6),
