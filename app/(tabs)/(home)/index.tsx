@@ -1,20 +1,20 @@
-import { AuthContext } from "@/app/_layout";
+import Post, { TPost } from "@/components/Post";
 import { useRouter } from "expo-router";
-import { useContext } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useEffect, useState } from "react";
+import { FlatList, StyleSheet, useColorScheme, View } from "react-native";
 
 export default function Index() {
   const router = useRouter();
-  const { user, login } = useContext(AuthContext);
-  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
+  const [posts, setPosts] = useState<TPost[]>([]);
+  useEffect(() => {
+    fetch(`posts`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("postData", data);
+        setPosts(data.posts);
+      });
+  }, []);
   return (
     <View
       style={[
@@ -22,33 +22,11 @@ export default function Index() {
         colorScheme === "dark" ? styles.containerDark : styles.containerLight,
       ]}
     >
-      <View>
-        <TouchableOpacity onPress={() => router.push("/username/post/1")}>
-          <Text
-            style={colorScheme === "dark" ? styles.textDark : styles.textLight}
-          >
-            게시글1
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View>
-        <TouchableOpacity onPress={() => router.push("/username/post/2")}>
-          <Text
-            style={colorScheme === "dark" ? styles.textDark : styles.textLight}
-          >
-            게시글2
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View>
-        <TouchableOpacity onPress={() => router.push("/username/post/3")}>
-          <Text
-            style={colorScheme === "dark" ? styles.textDark : styles.textLight}
-          >
-            게시글3
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <FlatList
+        data={posts}
+        renderItem={({ item }) => <Post item={item} />}
+        keyExtractor={(item) => item.id}
+      />
     </View>
   );
 }
