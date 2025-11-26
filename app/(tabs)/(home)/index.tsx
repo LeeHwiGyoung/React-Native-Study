@@ -1,30 +1,31 @@
 import Post, { TPost } from "@/components/Post";
 import { FlashList } from "@shopify/flash-list";
-import { usePathname, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 
 export default function Index() {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const path = usePathname();
   const [posts, setPosts] = useState<TPost[]>([]);
-  const onEndReached = () => {
-    fetch(`posts?type=${path.split("/").pop()}&cursor=${posts.at(-1)?.id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPosts([...posts, ...data.posts]);
-      });
-  };
+
+  const onEndReached = useCallback(() => {
+    if (posts.length > 0) {
+      fetch(`/posts?cursor=${posts.at(-1)?.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setPosts((prev) => [...prev, ...data.posts]);
+        });
+    }
+  }, [posts]);
 
   useEffect(() => {
-    fetch(`posts?type=${path.split("/").pop()}`)
+    fetch(`posts`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("postData", data);
         setPosts(data.posts);
       });
-  }, [path]);
+  }, []);
   return (
     <View
       style={[

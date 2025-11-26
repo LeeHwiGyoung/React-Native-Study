@@ -1,6 +1,6 @@
 import SideMenu from "@/components/SideMenu";
 import { Ionicons } from "@expo/vector-icons";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
   Image,
   Pressable,
@@ -18,20 +18,35 @@ import { FlashList } from "@shopify/flash-list";
 export default function Saech() {
   const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [followSuggestUsers, setFollowSuggestUsers] =
-    useState<FollowSuggestUser[]>();
+  const [followSuggestUsers, setFollowSuggestUsers] = useState<
+    FollowSuggestUser[]
+  >([]);
+
   const { user } = useContext(AuthContext);
   const isLoggedIn = !!user;
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
-  useEffect(() => {
-    fetch("/users")
+  const onEndReached = useCallback(() => {
+    fetch(`users?cursor=${followSuggestUsers?.at(-1)?.id}`)
       .then((res) => res.json())
       .then((data) => {
-        setFollowSuggestUsers(data.users);
+        if (data.users.length > 0) {
+          setFollowSuggestUsers((prev) => [...prev, ...data.users]);
+        }
+      });
+  }, [followSuggestUsers]);
+
+  useEffect(() => {
+    fetch(`users`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.users.length > 0) {
+          setFollowSuggestUsers((prev) => [...prev, ...data.users]);
+        }
       });
   }, []);
+
   return (
     <View
       style={[
@@ -84,6 +99,7 @@ export default function Saech() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: insets.bottom }}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
+          onEndReached={onEndReached}
         />
       </View>
     </View>
