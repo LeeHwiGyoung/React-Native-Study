@@ -2,7 +2,6 @@ import SideMenu from "@/components/SideMenu";
 import { Ionicons } from "@expo/vector-icons";
 import { useContext, useEffect, useState } from "react";
 import {
-  FlatList,
   Image,
   Pressable,
   StyleSheet,
@@ -14,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
 import FollowSuggest, { FollowSuggestUser } from "@/components/FollowSuggest";
+import { FlashList } from "@shopify/flash-list";
 
 export default function Saech() {
   const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
@@ -77,7 +77,7 @@ export default function Saech() {
       </View>
       <View style={styles.followSuggestContainer}>
         <Text style={styles.followSuggestText}>Follow suggestions</Text>
-        <FlatList
+        <FlashList
           data={followSuggestUsers}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <FollowSuggest item={item} />}

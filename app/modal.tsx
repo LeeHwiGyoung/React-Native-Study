@@ -6,7 +6,6 @@ import { router } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
-  FlatList,
   Image,
   Linking,
   Pressable,
@@ -17,6 +16,7 @@ import {
   Modal as RNModal,
   useColorScheme,
 } from "react-native";
+import { FlashList } from "@shopify/flash-list";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 interface Thread {
   id: string;
@@ -274,7 +274,7 @@ export default function Modal() {
           multiline
         />
         {item.imageUris && item.imageUris.length > 0 && (
-          <FlatList
+          <FlashList
             data={item.imageUris}
             renderItem={({ item: uri, index: imgIndex }) => (
               <View style={styles.imagePreviewContainer}>
@@ -377,7 +377,7 @@ export default function Modal() {
         </Text>
         <View style={styles.headerRightPlaceHolder} />
       </View>
-      <FlatList
+      <FlashList
         data={threads}
         keyExtractor={(item) => item.id}
         renderItem={renderThreadItem}

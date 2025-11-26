@@ -1,7 +1,8 @@
 import FollowSimpleActivityItem from "@/components/FollowSimpleActivityItem";
 import { TPost } from "@/components/Post";
+import { FlashList } from "@shopify/flash-list";
 import { useEffect, useState } from "react";
-import { View, FlatList, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -18,7 +19,7 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <FlatList
+      <FlashList
         contentContainerStyle={{ paddingBottom: insets.bottom }}
         data={followPost}
         keyExtractor={(item) => item.id}

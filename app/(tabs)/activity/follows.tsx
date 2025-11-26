@@ -1,7 +1,8 @@
 import { User } from "@/app/_layout";
 import FollowSuggestSimple from "@/components/FollowSuggestionSimple";
+import { FlashList } from "@shopify/flash-list";
 import { useEffect, useState } from "react";
-import { View, FlatList, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Follows() {
@@ -18,7 +19,7 @@ export default function Follows() {
 
   return (
     <View style={styles.container}>
-      <FlatList
+      <FlashList
         contentContainerStyle={{ paddingBottom: insets.bottom }}
         data={followUser}
         keyExtractor={(item) => item.id}

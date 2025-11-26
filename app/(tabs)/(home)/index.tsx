@@ -1,20 +1,30 @@
 import Post, { TPost } from "@/components/Post";
-import { useRouter } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
+import { usePathname, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, useColorScheme, View } from "react-native";
+import { StyleSheet, useColorScheme, View } from "react-native";
 
 export default function Index() {
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const path = usePathname();
   const [posts, setPosts] = useState<TPost[]>([]);
+  const onEndReached = () => {
+    fetch(`posts?type=${path.split("/").pop()}&cursor=${posts.at(-1)?.id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setPosts([...posts, ...data.posts]);
+      });
+  };
+
   useEffect(() => {
-    fetch(`posts`)
+    fetch(`posts?type=${path.split("/").pop()}`)
       .then((res) => res.json())
       .then((data) => {
         console.log("postData", data);
         setPosts(data.posts);
       });
-  }, []);
+  }, [path]);
   return (
     <View
       style={[
@@ -22,10 +32,11 @@ export default function Index() {
         colorScheme === "dark" ? styles.containerDark : styles.containerLight,
       ]}
     >
-      <FlatList
+      <FlashList
         data={posts}
         renderItem={({ item }) => <Post item={item} />}
         keyExtractor={(item) => item.id}
+        onEndReached={onEndReached}
       />
     </View>
   );
