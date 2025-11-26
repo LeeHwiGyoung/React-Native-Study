@@ -165,7 +165,7 @@ window.server = createServer({
     });
 
     this.get("users/:id", (schema, request) => {
-      return schema.find("user", request.params.id);
+      return schema.find("user", request.params.id.slice(1));
     });
   },
 });
