@@ -61,7 +61,7 @@ const Post = ({ item }: { item: TPost }) => {
   };
 
   const handleUserPress = (post: TPost) => {
-    router.push(`/@${post.user.name}`);
+    router.push(`/@${post.user.id}`);
   };
 
   return (

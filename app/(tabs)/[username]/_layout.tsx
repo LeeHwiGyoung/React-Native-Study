@@ -1,5 +1,5 @@
 // 컴포넌트는  공유하는데 주소만 다르게 하는 패턴
-import { withLayoutContext } from "expo-router";
+import { useLocalSearchParams, withLayoutContext } from "expo-router";
 
 import {
   createMaterialTopTabNavigator,
@@ -17,9 +17,9 @@ import {
   View,
 } from "react-native";
 import SideMenu from "@/components/SideMenu";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { AuthContext } from "@/app/_layout";
+import { AuthContext, User } from "@/app/_layout";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { Navigator } = createMaterialTopTabNavigator();
@@ -33,7 +33,9 @@ export const MaterialTopTabs = withLayoutContext<
 
 export default function Layout() {
   const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
+  const [profileUser, setProfileUser] = useState<User | null>(null);
   const { user } = useContext(AuthContext);
+  const { username } = useLocalSearchParams();
   const isLoggedIn = !!user;
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
@@ -47,6 +49,21 @@ export default function Layout() {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (username !== `@${user?.id}`) {
+      fetch(`/users/${username}`)
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          console.log(data?.user);
+          setProfileUser(data?.user);
+        });
+    } else {
+      setProfileUser(user);
+    }
+  }, [username, user]);
   return (
     <View
       style={[
@@ -84,9 +101,9 @@ export default function Layout() {
       </View>
       <View style={styles.profile}>
         <View style={styles.profileHeader}>
-          {user?.profileImageUrl ? (
+          {profileUser?.profileImageUrl ? (
             <Image
-              source={{ uri: user?.profileImageUrl }}
+              source={{ uri: profileUser?.profileImageUrl }}
               style={styles.profileAvatar}
             />
           ) : (
@@ -104,7 +121,7 @@ export default function Layout() {
                 : styles.profileLightText,
             ]}
           >
-            {user?.id}
+            {profileUser?.id}
           </Text>
           <Text
             style={
@@ -113,7 +130,7 @@ export default function Layout() {
                 : styles.profileLightText
             }
           >
-            {user?.name}
+            {profileUser?.name}
           </Text>
           <Text
             style={[
@@ -123,7 +140,7 @@ export default function Layout() {
                 : styles.profileLightText,
             ]}
           >
-            {user?.description}
+            {profileUser?.description}
           </Text>
         </View>
         <View style={styles.actionButtons}>

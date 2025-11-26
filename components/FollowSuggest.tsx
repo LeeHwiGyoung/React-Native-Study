@@ -38,7 +38,7 @@ const FollowSuggest = ({ item }: { item: FollowSuggestUser }) => {
     // 1. 전체 컨테이너: 가로 정렬
     <TouchableOpacity
       style={styles.followSuggestContainer}
-      onPress={() => onPressFollowSuggest(item.name)}
+      onPress={() => onPressFollowSuggest(item.id)}
       activeOpacity={0.8}
     >
       {/* 2. 프로필 이미지 영역 */}

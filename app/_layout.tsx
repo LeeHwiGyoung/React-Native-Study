@@ -17,7 +17,7 @@ export interface User {
 }
 
 export const AuthContext = createContext<{
-  user?: User | null;
+  user: User | null;
   login?: () => Promise<any>;
   logout?: () => Promise<any>;
   updateUser?: (user: User | null) => void;
