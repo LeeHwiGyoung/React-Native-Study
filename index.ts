@@ -52,6 +52,7 @@ window.server = createServer({
         `https://avatars.githubusercontent.com/u/${Math.floor(Math.random() * 100_000)}?v=4`,
       isVerified: () => Math.random() > 0.5,
       follower: () => Math.floor(Math.random() * 1000),
+      following: () => Math.random() > 0.3,
     }),
     post: Factory.extend({
       id: () => faker.string.numeric(6),
@@ -125,8 +126,19 @@ window.server = createServer({
     });
 
     this.get("/posts", (schema, request) => {
-      const cursor = parseInt((request.queryParams.cursor as string) || "0");
-      return schema.all("post").slice(cursor, cursor + 10);
+      let posts = schema.all("post");
+      if (request.queryParams.type === "following") {
+        posts = posts.filter((post) => post.user?.following);
+      }
+
+      let targetIndex = -1;
+
+      if (request.queryParams.cursor) {
+        targetIndex = posts.models.findIndex(
+          (v) => v.id === request.queryParams.cursor
+        );
+      }
+      return schema.all("post").slice(targetIndex + 1, targetIndex + 11);
     });
 
     this.get("/posts/:id", (schema, request) => {
@@ -141,8 +153,15 @@ window.server = createServer({
     });
 
     this.get("users", (schema, request) => {
-      const cursor = parseInt((request.queryParams.cursor as string) || "0");
-      return schema.all("user").slice(cursor, cursor + 10);
+      const users = schema.all("user");
+      let targetIndex = -1;
+      if (request.queryParams.cursor) {
+        targetIndex = users.models.findIndex(
+          (v) => v.id === request.queryParams.cursor
+        );
+      }
+
+      return schema.all("user").slice(targetIndex + 1, targetIndex + 6);
     });
 
     this.get("users/:id", (schema, request) => {
