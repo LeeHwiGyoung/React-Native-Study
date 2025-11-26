@@ -1,5 +1,5 @@
 // 컴포넌트는  공유하는데 주소만 다르게 하는 패턴
-import { Slot, usePathname, withLayoutContext } from "expo-router";
+import { Slot, withLayoutContext } from "expo-router";
 
 import {
   createMaterialTopTabNavigator,
@@ -8,7 +8,6 @@ import {
 } from "@react-navigation/material-top-tabs";
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import {
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -17,10 +16,14 @@ import {
   View,
 } from "react-native";
 import SideMenu from "@/components/SideMenu";
-import { useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthContext } from "@/app/_layout";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -31,103 +34,117 @@ export const MaterialTopTabs = withLayoutContext<
   MaterialTopTabNavigationEventMap
 >(Navigator);
 
+export const AnimationContext = createContext({
+  pullDownPosition: null as any,
+});
 export default function Layout() {
   const colorScheme = useColorScheme();
   const { user, login } = useContext(AuthContext);
   const isLoggedIn = !!user;
   const [isVisibleSideMenu, setIsVisibleSideMenu] = useState(false);
   const insets = useSafeAreaInsets();
+  const pullDownPosition = useSharedValue(0);
 
+  const rotateStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${pullDownPosition.value}deg` }],
+    };
+  });
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: insets.top },
-        colorScheme === "dark" ? styles.containerDark : styles.containerLight,
-      ]}
-    >
-      <SideMenu
-        onClose={() => setIsVisibleSideMenu(false)}
-        isVisible={isVisibleSideMenu}
-      />
+    <AnimationContext value={{ pullDownPosition }}>
       <View
         style={[
-          styles.header,
-          colorScheme === "dark" ? styles.headerDark : styles.headerLight,
+          styles.container,
+          { paddingTop: insets.top },
+          colorScheme === "dark" ? styles.containerDark : styles.containerLight,
         ]}
       >
-        {isLoggedIn && (
-          <Pressable
-            style={styles.sideMenu}
-            onPress={() => setIsVisibleSideMenu(true)}
-          >
-            <Ionicons
-              name="menu"
-              size={24}
-              color={colorScheme === "dark" ? "white" : "black"}
-            />
-          </Pressable>
-        )}
-        <Image
-          style={styles.headerLogo}
-          source={require("../../../assets/images/react-logo.png")}
+        <SideMenu
+          onClose={() => setIsVisibleSideMenu(false)}
+          isVisible={isVisibleSideMenu}
         />
-        {!isLoggedIn && (
-          <TouchableOpacity
-            style={[
-              styles.loginButton,
-              colorScheme === "dark"
-                ? styles.loginButtonDark
-                : styles.loginButtonLight,
-            ]}
-            onPress={login}
-          >
-            <Text
-              style={
-                colorScheme === "dark"
-                  ? styles.loginButtonDarkText
-                  : styles.loginButtonLightText
-              }
+        <View
+          style={[
+            styles.header,
+            colorScheme === "dark" ? styles.headerDark : styles.headerLight,
+          ]}
+        >
+          {isLoggedIn && (
+            <Pressable
+              style={styles.sideMenu}
+              onPress={() => setIsVisibleSideMenu(true)}
             >
-              로그인
-            </Text>
-          </TouchableOpacity>
+              <Ionicons
+                name="menu"
+                size={24}
+                color={colorScheme === "dark" ? "white" : "black"}
+              />
+            </Pressable>
+          )}
+          <Animated.Image
+            style={[styles.headerLogo, rotateStyle]}
+            source={require("../../../assets/images/react-logo.png")}
+          />
+          {!isLoggedIn && (
+            <TouchableOpacity
+              style={[
+                styles.loginButton,
+                colorScheme === "dark"
+                  ? styles.loginButtonDark
+                  : styles.loginButtonLight,
+              ]}
+              onPress={login}
+            >
+              <Text
+                style={
+                  colorScheme === "dark"
+                    ? styles.loginButtonDarkText
+                    : styles.loginButtonLightText
+                }
+              >
+                로그인
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        {isLoggedIn ? (
+          <MaterialTopTabs
+            screenOptions={{
+              lazy: true,
+              lazyPreloadDistance: 1,
+              tabBarStyle: {
+                backgroundColor: colorScheme === "dark" ? "#181818" : "white",
+                shadowColor: "transparent",
+                position: "relative",
+              },
+              tabBarPressColor: "transparent",
+              tabBarActiveTintColor: colorScheme === "dark" ? "white" : "#555",
+              tabBarIndicatorStyle: {
+                backgroundColor: colorScheme === "dark" ? "white" : "black",
+                height: 1,
+              },
+              tabBarIndicatorContainerStyle: {
+                backgroundColor: colorScheme === "dark" ? "white" : "#aaa",
+                position: "absolute",
+                top: 49,
+                height: 1,
+              },
+            }}
+          >
+            <MaterialTopTabs.Screen
+              name="index"
+              options={{ title: "For you" }}
+            />
+            <MaterialTopTabs.Screen
+              name="following"
+              options={{ title: "Following" }}
+            />
+          </MaterialTopTabs>
+        ) : (
+          <Slot />
         )}
       </View>
-      {isLoggedIn ? (
-        <MaterialTopTabs
-          screenOptions={{
-            lazy: true,
-            lazyPreloadDistance: 1,
-            tabBarStyle: {
-              backgroundColor: colorScheme === "dark" ? "#181818" : "white",
-              shadowColor: "transparent",
-              position: "relative",
-            },
-            tabBarPressColor: "transparent",
-            tabBarActiveTintColor: colorScheme === "dark" ? "white" : "#555",
-            tabBarIndicatorStyle: {
-              backgroundColor: colorScheme === "dark" ? "white" : "black",
-              height: 1,
-            },
-            tabBarIndicatorContainerStyle: {
-              backgroundColor: colorScheme === "dark" ? "white" : "#aaa",
-              position: "absolute",
-              top: 49,
-              height: 1,
-            },
-          }}
-        >
-          <MaterialTopTabs.Screen name="index" options={{ title: "For you" }} />
-          <MaterialTopTabs.Screen
-            name="following"
-            options={{ title: "Following" }}
-          />
-        </MaterialTopTabs>
-      ) : (
-        <Slot />
-      )}
-    </View>
+    </AnimationContext>
   );
 }
 const styles = StyleSheet.create({
