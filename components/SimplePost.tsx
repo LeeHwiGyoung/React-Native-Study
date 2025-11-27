@@ -8,12 +8,18 @@ import {
 } from "react-native";
 import { TPost } from "./Post";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 export default function SimplePost({ item }: { item: TPost }) {
+  const router = useRouter();
+  const onPressProfile = (username: string | undefined) => {
+    router.push(`/@${username}`);
+  };
+
   return (
     <TouchableOpacity style={styles.followSimpleActivityContainer}>
       <View style={styles.profileContainer}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => onPressProfile(item.user.id)}>
           {item.user.profileImageUrl ? (
             <Image
               style={styles.avatar}
