@@ -51,13 +51,12 @@ export default function Layout() {
   };
 
   useEffect(() => {
-    if (username !== `@${user?.id}`) {
+    if (username !== undefined && username !== `@${user?.id}`) {
       fetch(`/users/${username}`)
         .then((res) => {
           return res.json();
         })
         .then((data) => {
-          console.log(data?.user);
           setProfileUser(data?.user);
         });
     } else {
@@ -108,8 +107,9 @@ export default function Layout() {
             />
           ) : (
             <Ionicons
-              name="person-circle-outline"
+              name="person-circle"
               size={60}
+              color="#ccc"
               style={styles.profileAvatar}
             />
           )}
