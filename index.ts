@@ -142,9 +142,31 @@ window.server = createServer({
     });
 
     this.get("/posts/:id", (schema, request) => {
-      const post = schema.find("post", request.params.id);
-      const comments = schema.all("post").slice(0, 10);
-      return { post, comments };
+      const post = schema.where(
+        "post",
+        (post) => post.userId === request.params.id
+      );
+      let targetIndex = -1;
+      if (request.queryParams.cursor) {
+        targetIndex = post.models.findIndex(
+          (v) => v.id === request.queryParams.cursor
+        );
+      }
+      return post.slice(targetIndex + 1, targetIndex + 6);
+    });
+
+    this.get("/replies/:id", (schema, request) => {
+      const post = schema.where(
+        "post",
+        (post) => post.userId !== request.params.id
+      );
+      let targetIndex = -1;
+      if (request.queryParams.cursor) {
+        targetIndex = post.models.findIndex(
+          (v) => v.id === request.queryParams.cursor
+        );
+      }
+      return post.slice(targetIndex + 1, targetIndex + 6);
     });
 
     this.get("activities", (schema, request) => {
