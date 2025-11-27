@@ -59,7 +59,6 @@ function AnimatedAppLoader({
         return res.json();
       })
       .then((data) => {
-        console.log(data);
         setUser(data.user);
         return Promise.all([
           SecureStore.setItemAsync("accessToken", data.accessToken),
