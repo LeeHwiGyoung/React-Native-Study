@@ -44,7 +44,8 @@ export function ListFooter({
               ? styles.avatarSmallDark
               : styles.avatarSmallLight,
           ]}
-          name="person-circle-outline"
+          name="person-circle"
+          color="#ccc"
           size={24}
         />
       </View>
@@ -227,9 +228,9 @@ export default function Modal() {
     <View style={[styles.threadContainer]}>
       <View style={styles.avatarContainer}>
         <Ionicons
-          name="person-circle-outline"
+          name="person-circle"
           size={40}
-          color={colorScheme === "dark" ? "white" : "black"}
+          color={colorScheme === "dark" ? "white" : "#ccc"}
         />
         <View
           style={[

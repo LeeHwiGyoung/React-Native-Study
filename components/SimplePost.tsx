@@ -9,8 +9,7 @@ import {
 import { TPost } from "./Post";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function FollowSimpleActivityItem({ item }: { item: TPost }) {
-  console.log("item", item);
+export default function SimplePost({ item }: { item: TPost }) {
   return (
     <TouchableOpacity style={styles.followSimpleActivityContainer}>
       <View style={styles.profileContainer}>
@@ -21,7 +20,12 @@ export default function FollowSimpleActivityItem({ item }: { item: TPost }) {
               source={{ uri: item.user.profileImageUrl }}
             />
           ) : (
-            <Ionicons style={styles.avatar} name="person-circle" size={40} />
+            <Ionicons
+              style={styles.avatar}
+              name="person-circle"
+              size={40}
+              color="#ccc"
+            />
           )}
         </TouchableOpacity>
       </View>

@@ -1,4 +1,4 @@
-import FollowSimpleActivityItem from "@/components/FollowSimpleActivityItem";
+import SimplePost from "@/components/SimplePost";
 import { TPost } from "@/components/Post";
 import { FlashList } from "@shopify/flash-list";
 import { useEffect, useState } from "react";
@@ -23,7 +23,7 @@ export default function Index() {
         contentContainerStyle={{ paddingBottom: insets.bottom }}
         data={followPost}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <FollowSimpleActivityItem item={item} />}
+        renderItem={({ item }) => <SimplePost item={item} />}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
     </View>
