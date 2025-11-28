@@ -25,10 +25,10 @@ export default function Username() {
   };
 
   const onEndReached = useCallback(() => {
-    fetch(`posts/${username.slice(1)}?cursor=${threadPost.at(-1)?.id}`)
+    fetch(`users/${username.slice(1)}?cursor=${threadPost.at(-1)?.id}/posts`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.posts.length > 0) {
+        if (data?.posts.length > 0) {
           setThreadPost((prev) => [...prev, ...data.posts]);
         }
       });
@@ -36,7 +36,7 @@ export default function Username() {
 
   useEffect(() => {
     if (username !== undefined) {
-      fetch(`posts/${username.slice(1)}`)
+      fetch(`users/${username.slice(1)}/posts`)
         .then((res) => res.json())
         .then((data) => {
           setThreadPost(data.posts);

@@ -57,7 +57,7 @@ const Post = ({ item }: { item: TPost }) => {
       isLiked: false,
       shares: 0,
     };
-    router.push(`/@${post.user.name}/post/${post.id}`);
+    router.push(`/@${post.user.id}/post/${post.id}`);
   };
 
   const handleUserPress = (post: TPost) => {
@@ -154,6 +154,34 @@ const Post = ({ item }: { item: TPost }) => {
         {item.location && item.location.length > 0 && (
           <Text style={styles.postText}>{item.location.join(", ")}</Text>
         )}
+      </View>
+      <View style={styles.postFooter}>
+        <View style={styles.postActionButtons}>
+          <Pressable>
+            <Ionicons style={styles.postActionButton} name="heart" size={16} />
+          </Pressable>
+          <Pressable style={styles.row}>
+            <Ionicons
+              style={styles.postActionButton}
+              name="chatbox-outline"
+              size={16}
+            />
+            <Text style={styles.commentText}>{item.comments}</Text>
+          </Pressable>
+          <Pressable>
+            <Ionicons style={styles.postActionButton} name="repeat" size={16} />
+          </Pressable>
+          <Pressable>
+            <Ionicons
+              style={[
+                styles.postActionButton,
+                { transform: [{ rotate: "18deg" }] },
+              ]}
+              name="paper-plane-outline"
+              size={16}
+            />
+          </Pressable>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -259,6 +287,23 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 14,
     color: "#666",
+  },
+  postFooter: {
+    marginLeft: 52,
+    marginTop: 12,
+  },
+  postActionButtons: {
+    flexDirection: "row",
+    gap: 20,
+  },
+  postActionButton: {
+    verticalAlign: "bottom",
+  },
+  commentText: {
+    marginLeft: 4,
+  },
+  row: {
+    flexDirection: "row",
   },
 });
 
