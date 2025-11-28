@@ -141,10 +141,10 @@ window.server = createServer({
       return schema.all("post").slice(targetIndex + 1, targetIndex + 11);
     });
 
-    this.get("/posts/:id", (schema, request) => {
+    this.get("/users/:userId/posts", (schema, request) => {
       const post = schema.where(
         "post",
-        (post) => post.userId === request.params.id
+        (post) => post.userId === request.params.userId
       );
       let targetIndex = -1;
       if (request.queryParams.cursor) {
@@ -153,6 +153,10 @@ window.server = createServer({
         );
       }
       return post.slice(targetIndex + 1, targetIndex + 6);
+    });
+
+    this.get("/posts/:id", (schema, request) => {
+      return schema.find("post", request.params.id);
     });
 
     this.get("/replies/:id", (schema, request) => {
