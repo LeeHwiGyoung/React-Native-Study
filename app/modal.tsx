@@ -18,12 +18,13 @@ import {
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 interface Thread {
   id: string;
   text: string;
   hashTag?: string;
   location?: [number, number];
-  imageUris: string[];
+  imageUrls: string[];
 }
 
 export function ListFooter({
@@ -61,7 +62,7 @@ export function ListFooter({
 }
 export default function Modal() {
   const [threads, setThreads] = useState<Thread[]>([
-    { id: Date.now().toString(), text: "", imageUris: [] },
+    { id: Date.now().toString(), text: "", imageUrls: [] },
   ]);
   const [replyOption, setReplyOption] = useState("Anyone");
   const [isPosting, setIsPosting] = useState(false);
@@ -72,9 +73,9 @@ export default function Modal() {
   const colorScheme = useColorScheme();
   const canAddThread =
     (threads.at(-1)?.text.trim().length ?? 0) > 0 ||
-    (threads.at(-1)?.imageUris.length ?? 0) > 0;
+    (threads.at(-1)?.imageUrls.length ?? 0) > 0;
   const canPost = threads.every(
-    (thread) => thread.text.trim().length > 0 || thread.imageUris.length > 0
+    (thread) => thread.text.trim().length > 0 || thread.imageUrls.length > 0
   );
 
   const getMyLocation = async (id: string) => {
@@ -141,7 +142,7 @@ export default function Modal() {
           thread.id === id
             ? {
                 ...thread,
-                imageUris: thread.imageUris.concat(
+                imageUrls: thread.imageUrls.concat(
                   result.assets?.map((asset) => asset.uri) ?? []
                 ),
               }
@@ -181,7 +182,7 @@ export default function Modal() {
           thread.id === id
             ? {
                 ...thread,
-                imageUris: thread.imageUris.concat(
+                imageUris: thread.imageUrls.concat(
                   result.assets?.map((asset) => asset.uri) ?? []
                 ),
               }
@@ -191,20 +192,81 @@ export default function Modal() {
     }
   };
 
-  const removeImageFromThread = (id: string, uriToRemove: string) => {
+  const removeImageFromThread = (id: string, urlToRemove: string) => {
     setThreads((prevThreads) =>
       prevThreads.map((thread) =>
         thread.id === id
           ? {
               ...thread,
-              imageUris: thread.imageUris.filter((uri) => uri !== uriToRemove),
+              imageUris: thread.imageUrls.filter((url) => url !== urlToRemove),
             }
           : thread
       )
     );
   };
 
-  const handlePost = () => {};
+  const handlePost = () => {
+    const formData = new FormData();
+    threads.forEach((thread, index) => {
+      formData.append(`posts[${index}][id]`, thread.id);
+      formData.append(`posts[${index}][content]`, thread.text);
+      formData.append(`posts[${index}][userId]`, "hwigyoung");
+      if (thread.location !== undefined) {
+        formData.append(
+          `posts[${index}][location]`,
+          JSON.stringify(thread.location)
+        );
+      }
+      thread.imageUrls.forEach((imageUrl, imageIndex) => {
+        formData.append(`posts[${index}][imageUrls][${imageIndex}]`, {
+          uri: imageUrl,
+          name: `image_${index}_${imageIndex}.png`,
+          type: "image/png",
+        } as unknown as Blob);
+      });
+    });
+
+    Toast.show({
+      text1: "Posting...",
+      type: "info",
+      visibilityTime: 5000,
+      position: "bottom",
+      bottomOffset: 20,
+    });
+
+    fetch("/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        Toast.hide();
+        router.replace("/");
+        Toast.show({
+          text1: "Post posted",
+          type: "info",
+          visibilityTime: 3000,
+          position: "bottom",
+          bottomOffset: 20,
+          onPress: () => {
+            router.replace(`/@${data[0].userId}/post/${data[0].id}`);
+            Toast.hide();
+          },
+        });
+      })
+      .catch((error) => {
+        Toast.show({
+          text1: "Post failed",
+          type: "error",
+          visibilityTime: 3000,
+          position: "bottom",
+          bottomOffset: 20,
+        });
+      });
+  };
 
   const updateThreadText = (id: string, text: string) => {
     setThreads((prevThreads) =>
@@ -274,9 +336,9 @@ export default function Modal() {
           onBlur={() => setIsPosting(false)}
           multiline
         />
-        {item.imageUris && item.imageUris.length > 0 && (
+        {item.imageUrls && item.imageUrls.length > 0 && (
           <FlashList
-            data={item.imageUris}
+            data={item.imageUrls}
             renderItem={({ item: uri, index: imgIndex }) => (
               <View style={styles.imagePreviewContainer}>
                 <Image source={{ uri }} style={styles.imagePreview} />
@@ -389,7 +451,7 @@ export default function Modal() {
               if (canAddThread) {
                 setThreads((prevThreads) => [
                   ...prevThreads,
-                  { id: Date.now().toString(), text: "", imageUris: [] },
+                  { id: Date.now().toString(), text: "", imageUrls: [] },
                 ]);
               }
             }}
@@ -478,7 +540,16 @@ export default function Modal() {
           disabled={!canPost}
           onPress={handlePost}
         >
-          <Text style={styles.postButtonText}>Post</Text>
+          <Text
+            style={[
+              styles.postButtonText,
+              colorScheme === "dark"
+                ? styles.postButtonTextDark
+                : styles.postButtonTextLight,
+            ]}
+          >
+            Post
+          </Text>
         </Pressable>
       </View>
     </View>

@@ -37,7 +37,7 @@ export default function PostScreen() {
     fetch(`posts/${postID}`)
       .then((res) => res.json())
       .then((data) => {
-        setPost(data.post);
+        setPost(data?.post);
       });
   }, [username, postID]);
 
@@ -47,7 +47,7 @@ export default function PostScreen() {
       .then((data) => {
         setComment(data.posts);
       });
-  }, [postID]);
+  }, [username, postID]);
 
   const onEndReached = useCallback(() => {
     if (post && post.comments > comment.length) {

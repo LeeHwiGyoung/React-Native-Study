@@ -112,17 +112,48 @@ window.server = createServer({
       }
     });
 
-    this.post("/posts", (schema, request) => {
-      const { posts } = JSON.parse(request.requestBody);
+    this.post("/posts", async (schema, request) => {
+      const formData = request.requestBody as unknown as FormData;
+      const posts: Record<string, string | string[]>[] = [];
+      formData.forEach(async (value, key) => {
+        const match = key.match(/posts\[(\d+)\]\[(\w+)\](\[(\d+)\])?$/);
+        if (match) {
+          const [_, index, field, , imageIndex] = match;
+          const i = parseInt(index);
+          const imgI = parseInt(imageIndex);
+          if (!posts[i]) {
+            posts[i] = {};
+          }
+          if (field === "imageUrls") {
+            if (!posts[i].imageUrls) {
+              posts[i].imageUrls = [] as string[];
+            }
+            (posts[i].imageUrls as string[])[imgI] = (
+              value as unknown as { uri: string }
+            ).uri;
+          } else if (field === "location") {
+            posts[i].location = JSON.parse(value as string);
+          } else {
+            posts[i][field] = value as string;
+          }
+        }
+      });
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       posts.forEach((post: any) => {
         schema.create("post", {
+          id: post.id,
           content: post.content,
           imageUrls: post.imageUrls,
           location: post.location,
-          hashtag: post.hashtag,
           user: schema.find("user", "hwigyoung"),
+          likes: 0,
+          comments: 0,
+          reposts: 0,
         });
       });
+
+      console.log("posts", posts);
+      return posts;
     });
 
     this.get("/posts", (schema, request) => {
@@ -138,7 +169,9 @@ window.server = createServer({
           (v) => v.id === request.queryParams.cursor
         );
       }
-      return schema.all("post").slice(targetIndex + 1, targetIndex + 11);
+      return posts
+        .sort((a, b) => parseInt(b.id) - parseInt(a.id))
+        .slice(targetIndex + 1, targetIndex + 11);
     });
 
     this.get("/users/:userId/posts", (schema, request) => {
@@ -152,7 +185,9 @@ window.server = createServer({
           (v) => v.id === request.queryParams.cursor
         );
       }
-      return post.slice(targetIndex + 1, targetIndex + 6);
+      return post
+        .sort((a, b) => parseInt(b.id) - parseInt(a.id))
+        .slice(targetIndex + 1, targetIndex + 6);
     });
 
     this.get("/posts/:id", (schema, request) => {
@@ -170,7 +205,9 @@ window.server = createServer({
           (v) => v.id === request.queryParams.cursor
         );
       }
-      return post.slice(targetIndex + 1, targetIndex + 6);
+      return post
+        .sort((a, b) => parseInt(b.id) - parseInt(a.id))
+        .slice(targetIndex + 1, targetIndex + 6);
     });
 
     this.get("activities", (schema, request) => {
