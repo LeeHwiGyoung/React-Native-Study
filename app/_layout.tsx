@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
 import { Asset } from "expo-asset";
 import Constants from "expo-constants";
+import Toast from "react-native-toast-message";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -179,6 +180,7 @@ export default function RootLayout() {
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
         {/* presentation="modal" 은 모달형태로 띄워지게 됨 */}
       </Stack>
+      <Toast />
     </AnimatedAppLoader>
   );
 }
